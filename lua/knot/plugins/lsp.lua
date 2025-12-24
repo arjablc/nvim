@@ -29,7 +29,7 @@ return {
 
 			require("mason-lspconfig").setup({
 				auto_install = true,
-				ensure_intalled = lsp_list,
+				ensure_installed = lsp_list,
 			})
 
 			require("mason-tool-installer").setup({
