@@ -3,7 +3,9 @@ return { -- Linting
 	event = { "BufReadPre", "BufNewFile" },
 	config = function()
 		local lint = require("lint")
-		lint.linters_by_ft = {}
+		lint.linters_by_ft = {
+			python = { "ruff" },
+		}
 		-- {
 		--   clojure = { "clj-kondo" },
 		--   dockerfile = { "hadolint" },

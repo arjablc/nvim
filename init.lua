@@ -1,4 +1,5 @@
-require "knot.core"
-require "knot.lazy"
---TODO:  fix the sessions plugin
-
+if vim.g.vscode then
+else
+	require("knot.core")
+	require("knot.lazy")
+end

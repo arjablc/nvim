@@ -18,26 +18,29 @@ return {
 			"saghen/blink.cmp",
 		},
 		config = function()
-			local lsp_list = {
-				"clangd",
-				"gopls",
-				"pyright",
-				"rust_analyzer",
-				"ts_ls",
-				"lua_ls",
-			}
-
 			require("mason-lspconfig").setup({
 				auto_install = true,
-				ensure_installed = lsp_list,
+				ensure_installed = {
+					"pyright",
+					"clangd",
+					"gopls",
+					"rust_analyzer",
+					"ts_ls",
+					"lua_ls",
+					"marksman",
+				},
 			})
+
+			vim.lsp.enable("basepyright", false)
 
 			require("mason-tool-installer").setup({
 				ensure_installed = {
 					"eslint_d",
 					"stylua",
+					"ruff",
 				},
 			})
+
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
 				callback = function(event)
@@ -48,6 +51,7 @@ return {
 
 					map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
 					map("<leader>ca", vim.lsp.buf.code_action, "[G]oto Code [A]ction", { "n", "x" })
+					map("<C-.>", vim.lsp.buf.code_action, "[G]oto Code [A]ction", { "i" })
 					map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
 					map("gi", require("telescope.builtin").lsp_implementations, "[G]oto [I]mplementation")
 					map("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
@@ -103,10 +107,15 @@ return {
 					end
 				end,
 			})
+
 			vim.diagnostic.config({
 				severity_sort = true,
-				float = { border = "rounded", source = "if_many" },
-				underline = { severity = vim.diagnostic.severity.ERROR },
+				float = {
+					border = "rounded",
+					source = "if_many",
+				},
+				underline = true,
+
 				signs = vim.g.have_nerd_font and {
 					text = {
 						[vim.diagnostic.severity.ERROR] = "󰅚 ",
@@ -115,19 +124,9 @@ return {
 						[vim.diagnostic.severity.HINT] = "󰌶 ",
 					},
 				} or {},
-				virtual_text = {
-					source = "if_many",
-					spacing = 2,
-					format = function(diagnostic)
-						local diagnostic_message = {
-							[vim.diagnostic.severity.ERROR] = diagnostic.message,
-							[vim.diagnostic.severity.WARN] = diagnostic.message,
-							[vim.diagnostic.severity.INFO] = diagnostic.message,
-							[vim.diagnostic.severity.HINT] = diagnostic.message,
-						}
-						return diagnostic_message[diagnostic.severity]
-					end,
-				},
+
+				virtual_text = true,
+				virtual_lines = false,
 			})
 		end,
 	},

@@ -29,19 +29,23 @@ return {
 				enabled = true,
 				filter = nil, -- optional callback to filter the log
 				notify_errors = false, -- if there is an error whilst running then notify the user
-				open_cmd = "botright split", -- command to use to open the log buffer
+				open_cmd = "botright 10split", -- command to use to open the log buffer
 				focus_on_open = true, -- focus on the newly opened log window
 			},
 		})
 		vim.keymap.set("n", "<leader>fl", require("telescope").extensions.flutter.commands, { desc = "flutter tools" })
 		vim.keymap.set("n", "<leader>fd", "<cmd>FlutterLogToggle<CR>", { desc = "flutter logs" })
 
-		vim.keymap.set("n", "<leader>cf", function()
-			local filename = vim.fn.expand("%:t") -- e.g. MyFile.dart
-			local dot_pos = filename:match(".*()%.") or #filename + 1
-			vim.api.nvim_put({ filename:sub(1, dot_pos - 1) }, "c", true, true)
-			local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-			vim.api.nvim_win_set_cursor(0, { row, dot_pos - 1 })
-		end, { desc = "Insert filename without extension" })
+		vim.keymap.set("n", "<leader>fp", function()
+			local name = vim.fn.expand("%:t:r") -- file name without extension
+			local line = ('part "%s._.dart";'):format(name)
+
+			local row = vim.api.nvim_win_get_cursor(0)[1]
+			vim.api.nvim_buf_set_lines(0, row, row, true, { line })
+
+			local col = #('part "' .. name .. ".")
+			vim.api.nvim_win_set_cursor(0, { row + 1, col })
+			vim.api.nvim_feedkeys("ciw", "n", false)
+		end, { desc = "Flutter path" })
 	end,
 }
