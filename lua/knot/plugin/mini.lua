@@ -154,6 +154,52 @@ return {
 			pcall(MiniFiles.close)
 		end
 
+		local show_dotfiles = true
+		local function filter_show(_)
+			return true
+		end
+		local function filter_hide(fs_entry)
+			return not vim.startswith(fs_entry.name, ".")
+		end
+		local function toggle_dotfiles()
+			show_dotfiles = not show_dotfiles
+			local new_filter = show_dotfiles and filter_show or filter_hide
+			MiniFiles.refresh({ content = { filter = new_filter } })
+		end
+
+		local function files_set_cwd()
+			local entry = MiniFiles.get_fs_entry()
+			if not entry or not entry.path then
+				return
+			end
+
+			local cur_directory = vim.fs.dirname(entry.path)
+			if cur_directory then
+				vim.fn.chdir(cur_directory)
+			end
+		end
+
+		local function map_split(buf_id, lhs, direction, close_on_file)
+			vim.keymap.set("n", lhs, function()
+				local state = MiniFiles.get_explorer_state()
+				local cur_target_window = state and state.target_window
+				if not (cur_target_window and vim.api.nvim_win_is_valid(cur_target_window)) then
+					return
+				end
+
+				local new_target_window
+				vim.api.nvim_win_call(cur_target_window, function()
+					vim.cmd("belowright " .. direction .. " split")
+					new_target_window = vim.api.nvim_get_current_win()
+				end)
+
+				if new_target_window and vim.api.nvim_win_is_valid(new_target_window) then
+					MiniFiles.set_target_window(new_target_window)
+					MiniFiles.go_in({ close_on_file = close_on_file })
+				end
+			end, { buffer = buf_id, nowait = true, silent = true, desc = "Open in " .. direction .. " split" })
+		end
+
 		-- Buffer-local mappings for MiniFiles
 		vim.api.nvim_create_autocmd("User", {
 			pattern = "MiniFilesBufferCreate",
@@ -168,13 +214,24 @@ return {
 					open_entry({ cmd = "edit" })
 				end, { buffer = buf, nowait = true, silent = true, desc = "Open/go in" })
 
-				vim.keymap.set("n", "s", function()
-					open_entry({ cmd = "split" })
-				end, { buffer = buf, nowait = true, silent = true, desc = "Open in split" })
+				vim.keymap.set("n", "g.", toggle_dotfiles, {
+					buffer = buf,
+					nowait = true,
+					silent = true,
+					desc = "Toggle hidden files",
+				})
 
-				vim.keymap.set("n", "v", function()
-					open_entry({ cmd = "vsplit" })
-				end, { buffer = buf, nowait = true, silent = true, desc = "Open in vsplit" })
+				vim.keymap.set("n", "gc", files_set_cwd, {
+					buffer = buf,
+					nowait = true,
+					silent = true,
+					desc = "Set cwd",
+				})
+
+				map_split(buf, "<C-w>s", "horizontal", false)
+				map_split(buf, "<C-w>v", "vertical", false)
+				map_split(buf, "<C-w>S", "horizontal", true)
+				map_split(buf, "<C-w>V", "vertical", true)
 
 				vim.keymap.set("n", "p", function()
 					open_entry({ zathura_pdf = true })

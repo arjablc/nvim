@@ -26,9 +26,17 @@ return { -- Autoformat
 			end
 		end,
 		formatters_by_ft = {
+			javascript = { "prettierd", "prettier" },
+			javascriptreact = { "prettierd", "prettier" },
+			json = { "prettierd", "prettier" },
+			jsonc = { "prettierd", "prettier" },
 			lua = { "stylua" },
-			python = { "ruff_foramt" },
+			python = { "ruff_format" },
+			tsx = { "prettierd", "prettier" },
+			typescript = { "prettierd", "prettier" },
+			typescriptreact = { "prettierd", "prettier" },
 			c = { "clang-format" },
+			sql = { "pgformatter" },
 		},
 	},
 }

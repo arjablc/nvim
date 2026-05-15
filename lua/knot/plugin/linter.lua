@@ -4,7 +4,11 @@ return { -- Linting
 	config = function()
 		local lint = require("lint")
 		lint.linters_by_ft = {
-			python = { "ruff" },
+			javascript = { "eslint_d" },
+			javascriptreact = { "eslint_d" },
+			tsx = { "eslint_d" },
+			typescript = { "eslint_d" },
+			typescriptreact = { "eslint_d" },
 		}
 		-- {
 		--   clojure = { "clj-kondo" },

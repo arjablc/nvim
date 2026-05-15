@@ -1,3 +1,5 @@
+local notes_vault = vim.fs.normalize(vim.fn.expand("~") .. "/Documents/notes_vault")
+
 return {
 	{
 		"MeanderingProgrammer/render-markdown.nvim",
@@ -19,8 +21,8 @@ return {
 		version = "*",
 		lazy = true,
 		event = {
-			"BufReadPre " .. vim.fn.expand("~") .. "/Documents/notes_vault/**.md",
-			"BufNewFile " .. vim.fn.expand("~") .. "/Documents/notes_vault/**.md",
+			"BufReadPre " .. notes_vault .. "/**/*.md",
+			"BufNewFile " .. notes_vault .. "/**/*.md",
 		},
 		dependencies = {
 			"nvim-lua/plenary.nvim",
@@ -31,7 +33,7 @@ return {
 			workspaces = {
 				{
 					name = "notes_vault",
-					path = vim.fn.expand("~") .. "/Documents/notes_vault/",
+					path = notes_vault,
 				},
 			},
 			new_notes_location = "current_dir",
