@@ -100,52 +100,64 @@ local function patch_query_predicates_for_nvim_012()
 	end, opts)
 end
 
+local function ensure_parsers_installed()
+	local languages = {
+		"c",
+		"javascript",
+		"jsdoc",
+		"json",
+		"jsonc",
+		"lua",
+		"vim",
+		"vimdoc",
+		"query",
+		"markdown",
+		"rst",
+		"rust",
+		"dart",
+		"python",
+		"go",
+		"bash",
+		"toml",
+		"tsx",
+		"typescript",
+	}
+	-- `install` is a no-op for already-installed parsers, but skip the call
+	-- entirely once every requested language is available to avoid overhead.
+	local missing = {}
+	for _, lang in ipairs(languages) do
+		if not pcall(vim.treesitter.language.add, lang) then
+			missing[#missing + 1] = lang
+		end
+	end
+	if #missing > 0 then
+		require("nvim-treesitter").install(missing):wait(300000)
+	end
+end
+
+local function enable_treesitter_on_filetype()
+	vim.api.nvim_create_autocmd("FileType", {
+		group = vim.api.nvim_create_augroup("knot.treesitter", { clear = true }),
+		callback = function(args)
+			local ok = pcall(vim.treesitter.start, args.buf)
+			if not ok then
+				return
+			end
+			vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+			vim.wo[0][0].foldmethod = "expr"
+			vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+		end,
+	})
+end
+
 return {
 	"nvim-treesitter/nvim-treesitter",
-	branch = "master",
 	lazy = false,
 	build = ":TSUpdate",
-	config = function(_, opts)
-		require("nvim-treesitter.configs").setup(opts)
+	config = function()
+		require("nvim-treesitter").setup({})
+		ensure_parsers_installed()
 		patch_query_predicates_for_nvim_012()
+		enable_treesitter_on_filetype()
 	end,
-	opts = {
-		ensure_installed = {
-			"c",
-			"javascript",
-			"jsdoc",
-			"json",
-			"jsonc",
-			"lua",
-			"vim",
-			"vimdoc",
-			"query",
-			"markdown",
-			"rst",
-			"rust",
-			"dart",
-			"python",
-			"go",
-			"bash",
-			"toml",
-			"tsx",
-			"typescript",
-		},
-		sync_install = false,
-		auto_install = true,
-		highlight = {
-			enable = true,
-			additional_vim_regex_highlighting = false,
-		},
-		indent = { enable = true },
-		incremental_selection = {
-			enable = false,
-			keymaps = {
-				init_selection = "<C-space>",
-				node_incremental = "<C-space>",
-				scope_incremental = false,
-				node_decremental = "<bs>",
-			},
-		},
-	},
 }
