@@ -1,4 +1,4 @@
-local notes_vault = vim.fs.normalize(vim.fn.expand("~") .. "/Documents/notes_vault")
+local notes_vault = vim.fs.normalize(vim.fn.expand("~") .. "/dev/notes/")
 
 return {
 	{

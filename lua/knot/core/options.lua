@@ -31,6 +31,9 @@ opt.clipboard:append("unnamedplus")
 opt.splitright = true
 opt.splitbelow = true
 
+opt.foldlevel = 99
+opt.foldlevelstart = 99
+
 opt.swapfile = false
 vim.o.inccommand = "split"
 vim.o.incsearch = true
